@@ -73,16 +73,22 @@ var rootCmd = &cobra.Command{
 
 		var reader io.Reader
 
-		if infile != "" {
+		stat, _ := os.Stdin.Stat()
+
+		switch {
+		case stat.Mode()&os.ModeDevice == 0:
+			// if the input does not come from a character device (e.g. a terminal), it is most likely piped in
+			reader = cmd.InOrStdin()
+		case infile != "":
 			file, err := os.Open(infile)
 			if err != nil {
 				log.Fatalf("error opening file - %s", err)
 			}
 			defer file.Close()
 			reader = file
-		} else if text != "" {
+		case text != "":
 			reader = strings.NewReader(text)
-		} else {
+		default:
 			cmd.Help()
 			return
 		}
@@ -101,7 +107,6 @@ var rootCmd = &cobra.Command{
 		}
 
 		uwuify(reader, writer)
-
 	},
 }
 
