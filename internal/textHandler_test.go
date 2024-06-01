@@ -10,7 +10,7 @@ func BenchmarkTextHandler(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		f, _ := os.Open("../test/pasta.txt")
 		defer f.Close()
-		Uwuify(f, os.Stdout)
+		Uwuify(f, os.Stdout, Modifiers{1, 1, 1, 1, 1})
 	}
 }
 

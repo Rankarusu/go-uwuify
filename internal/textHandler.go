@@ -57,7 +57,15 @@ var textreplacementMap = []struct {
 	{regexp.MustCompile("OVE"), "UV"},
 }
 
-func Uwuify(r io.Reader, w io.Writer) {
+type Modifiers struct {
+	TextReplacements float64
+	Stutters         float64
+	Kaomoji          float64
+	Exclamations     float64
+	Actions          float64
+}
+
+func Uwuify(r io.Reader, w io.Writer, m Modifiers) {
 	content, err := io.ReadAll(r)
 	if err != nil {
 		log.Fatalf("error reading file - %s", err)
@@ -66,11 +74,11 @@ func Uwuify(r io.Reader, w io.Writer) {
 
 	words := strings.Split(s, " ")
 	for i := 0; i < len(words); i++ {
-		replaceText(&words[i], .5)
-		addStutters(&words[i], .025)
-		addKaomoji(&words[i], .025)
-		addExclamations(&words[i], .5)
-		addActions(&words[i], .025)
+		replaceText(&words[i], m.TextReplacements)
+		addStutters(&words[i], m.Stutters)
+		addKaomoji(&words[i], m.Kaomoji)
+		addExclamations(&words[i], m.Exclamations)
+		addActions(&words[i], m.Actions)
 	}
 
 	s = strings.Join(words, " ")
