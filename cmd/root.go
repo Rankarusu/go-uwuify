@@ -7,13 +7,15 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"unicode"
 
 	"github.com/spf13/cobra"
 )
 
-var spacePattern = regexp.MustCompile(" ")
+var spacePattern = regexp.MustCompile(`(\s)|($)`)
+var exclamationsPattern = regexp.MustCompile(`[.!?]+`)
+var wordStartPattern = regexp.MustCompile(`(^\w)|\s(\w)`)
 
-var exclamationsPattern = regexp.MustCompile("[.!?]+")
 var exclamations = []string{"!?", "?!!", "?!?1", "!!11", "?!?!"}
 
 var actions = []string{
@@ -125,7 +127,8 @@ func uwuify(r io.Reader, w io.Writer) {
 	s := string(content)
 
 	replaceText(&s, .5)
-	addKaomoji(&s, 0.025)
+	addStutters(&s, .025)
+	addKaomoji(&s, .025)
 	addExclamations(&s, .5)
 	addActions(&s, .025)
 
@@ -176,4 +179,15 @@ func replaceText(s *string, chance float64) {
 		})
 
 	}
+}
+
+func addStutters(s *string, chance float64) {
+	split := strings.Split(*s, " ")
+	for i := 0; i < len(split); i++ {
+		if rand.Float64() < chance && unicode.IsLetter(rune(split[i][0])) {
+			stutter := rand.Intn(2) + 1
+			split[i] = strings.Repeat(string(split[i][0])+"-", stutter) + split[i]
+		}
+	}
+	*s = strings.Join(split, " ")
 }
