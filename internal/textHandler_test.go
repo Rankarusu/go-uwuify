@@ -1,26 +1,41 @@
 package internal
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
 )
 
+var probabilities = []struct {
+	probability   float64
+	shouldBeEqual bool
+}{
+	{0, true},
+	{1, false},
+}
+
 func BenchmarkTextHandler(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		f, _ := os.Open("../test/pasta.txt")
 		defer f.Close()
-		Uwuify(f, os.Stdout, Modifiers{1, 1, 1, 1, 1})
+		Uwuify(f, os.Stdout, Options{1, 1, 1, 1, 1, true})
 	}
 }
 
 func TestAddActionsModifiesString(t *testing.T) {
-	input, inputCopy := "hello", "hello"
 
-	addActions(&input, 1)
-	if input == inputCopy {
-		t.Errorf("%s == %s", input, inputCopy)
+	for _, test := range probabilities {
+		t.Run(fmt.Sprintf("%f", test.probability), func(t *testing.T) {
+			input, inputCopy := "hello", "hello"
+
+			addActions(&input, test.probability)
+			if res := input == inputCopy; res != test.shouldBeEqual {
+				t.Errorf("%s, %s, should be equal: %t", input, inputCopy, test.shouldBeEqual)
+			}
+		})
 	}
+
 }
 
 func TestAddActionsAppendsCorrectString(t *testing.T) {
@@ -33,11 +48,16 @@ func TestAddActionsAppendsCorrectString(t *testing.T) {
 }
 
 func TestAddExclamationsModifiesString(t *testing.T) {
-	input, inputCopy := "hello!", "hello!"
 
-	addExclamations(&input, 1)
-	if input == inputCopy {
-		t.Errorf("%s == %s", input, inputCopy)
+	for _, test := range probabilities {
+		t.Run(fmt.Sprintf("%f", test.probability), func(t *testing.T) {
+			input, inputCopy := "hello!", "hello!"
+
+			addExclamations(&input, test.probability)
+			if res := input == inputCopy; res != test.shouldBeEqual {
+				t.Errorf("%s, %s, should be equal: %t", input, inputCopy, test.shouldBeEqual)
+			}
+		})
 	}
 }
 
@@ -51,84 +71,111 @@ func TestAddExclamationsAddsCorrectString(t *testing.T) {
 }
 
 func TestAddKaomojiModifiesString(t *testing.T) {
-	input, inputCopy := "hello", "hello"
+	for _, test := range probabilities {
+		t.Run(fmt.Sprintf("%f", test.probability), func(t *testing.T) {
+			input, inputCopy := "hello!", "hello!"
 
-	addKaomoji(&input, 1)
-	if input == inputCopy {
-		t.Errorf("%s == %s", input, inputCopy)
+			addKaomoji(&input, test.probability, true)
+			if res := input == inputCopy; res != test.shouldBeEqual {
+				t.Errorf("%s, %s, should be equal: %t", input, inputCopy, test.shouldBeEqual)
+			}
+		})
 	}
 }
 
 func TestAddKaomojiAppendsCorrectString(t *testing.T) {
 	input := "hello"
 
-	addKaomoji(&input, 1)
-	if !contains(input, kaomoji) {
+	addKaomoji(&input, 1, false)
+
+	if contains(input, kaomojiUnicode) {
+		t.Errorf("%s contains unicode kaomoji", input)
+	}
+
+	if !contains(input, kaomojiAscii) {
 		t.Errorf("%s does not contain kaomoji", input)
 	}
 }
 
 func TestReplaceText(t *testing.T) {
 	tests := []struct {
-		input string
-		want  string
+		input       string
+		probability float64
+		want        string
 	}{
 		{
-			input: "hello",
-			want:  "hewwo",
+			input:       "hello",
+			probability: 1,
+			want:        "hewwo",
 		},
 		{
-			input: "herpes",
-			want:  "hewpes",
+			input:       "herpes",
+			probability: 1,
+			want:        "hewpes",
 		},
 		{
-			input: "HELLO",
-			want:  "HEWWO",
+			input:       "HELLO",
+			probability: 1,
+			want:        "HEWWO",
 		},
 		{
-			input: "HERPES",
-			want:  "HEWPES",
+			input:       "HERPES",
+			probability: 1,
+			want:        "HEWPES",
 		},
 		{
-			input: "nope",
-			want:  "nyope",
+			input:       "nope",
+			probability: 1,
+			want:        "nyope",
 		},
 		{
-			input: "Nope",
-			want:  "Nyope",
+			input:       "Nope",
+			probability: 1,
+			want:        "Nyope",
 		},
 		{
-			input: "NOPE",
-			want:  "NYOPE",
+			input:       "NOPE",
+			probability: 1,
+			want:        "NYOPE",
 		},
 		{
-			input: "Dove",
-			want:  "Duv",
+			input:       "Dove",
+			probability: 1,
+			want:        "Duv",
 		},
 		{
-			input: "DOVE",
-			want:  "DUV",
+			input:       "DOVE",
+			probability: 1,
+			want:        "DUV",
+		},
+		{
+			input:       "hello",
+			probability: 0,
+			want:        "hello",
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
 			input := test.input
-			replaceText(&input, 1)
+			replaceText(&input, test.probability)
 			if input != test.want {
 				t.Errorf("%s != %s", input, test.want)
 			}
 		})
 	}
-
 }
 
 func TestAddStuttersModifiesString(t *testing.T) {
-	input, inputCopy := "hello", "hello"
+	for _, test := range probabilities {
+		t.Run(fmt.Sprintf("%f", test.probability), func(t *testing.T) {
+			input, inputCopy := "hello!", "hello!"
 
-	addStutters(&input, 1)
-	if input == inputCopy {
-		t.Errorf("%s == %s", input, inputCopy)
+			addStutters(&input, test.probability)
+			if res := input == inputCopy; res != test.shouldBeEqual {
+				t.Errorf("%s, %s, should be equal: %t", input, inputCopy, test.shouldBeEqual)
+			}
+		})
 	}
 }
 

@@ -20,6 +20,7 @@ var (
 	stutters         float64
 	exclamations     float64
 	actions          float64
+	allowUnicode     bool
 
 	rootCmd = &cobra.Command{
 
@@ -77,12 +78,13 @@ the modifiers --uwu, --kaomoji, --stutters, --exclamations, and --actions can be
 				writer = cmd.OutOrStdout()
 			}
 
-			internal.Uwuify(reader, writer, internal.Modifiers{
+			internal.Uwuify(reader, writer, internal.Options{
 				TextReplacements: textReplacements,
 				Stutters:         stutters,
 				Kaomoji:          kaomoji,
 				Exclamations:     exclamations,
 				Actions:          actions,
+				Unicode:          allowUnicode,
 			})
 		},
 	}
@@ -104,7 +106,9 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&outfile, "outfile", "o", "", "a file to output the uwuified text to")
 	rootCmd.MarkFlagsMutuallyExclusive("text", "infile")
 
-	rootCmd.PersistentFlags().Float64VarP(&textReplacements, "uwu", "u", .5, `probability for transforming text. e.g. love -> wuv`)
+	rootCmd.PersistentFlags().BoolVarP(&allowUnicode, "unicode", "u", false, `allow unicode characters for kaomoji`)
+
+	rootCmd.PersistentFlags().Float64VarP(&textReplacements, "replacements", "r", .5, `probability for transforming text. e.g. love -> wuv`)
 	rootCmd.PersistentFlags().Float64VarP(&kaomoji, "kaomoji", "k", .025, `probability for inserting kaomoji. e.g. OwO`)
 	rootCmd.PersistentFlags().Float64VarP(&stutters, "stutters", "s", .025, `probability for adding stutters to the beginning of a word. e.g. hello -> h-hello`)
 	rootCmd.PersistentFlags().Float64VarP(&exclamations, "exclamations", "e", .5, `probability for transforming punctuation. e.g. 1 -> !!11`)

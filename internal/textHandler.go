@@ -31,17 +31,36 @@ var actions = []string{
 	"*boops your nose*",
 }
 
-var kaomoji = []string{
-	"(・`ω´・)",
+var kaomojiAscii = []string{
 	";;w;;",
 	"OwO",
 	"UwU",
 	">w<",
 	"^w^",
-	"ÚwÚ",
 	"^-^",
 	":3",
 	"x3",
+	"xD",
+	"XD",
+}
+
+var kaomojiUnicode = []string{
+	"ÚwÚ",
+	"(・`ω´・)",
+	"(* ^ ω ^)",
+	"(o^▽^o)",
+	"(o･ω･o)",
+	"(≧◡≦)",
+	"(*´▽`*)",
+	"(*≧ω≦*)",
+	"o(≧▽≦)o",
+	"(ꈍᴗꈍ)♡",
+	"(〃￣ω￣〃)ゞ",
+	"( ੭•͈ω•͈)੭",
+	"(づ｡◕‿◕｡)づ",
+	"≽^•⩊•^≼",
+	"(⁄ ⁄>⁄ω⁄<⁄ ⁄)⁄",
+	"૮(っ˶ᵔ  ᵕ  ᵔ˶)ა",
 }
 
 var textreplacementMap = []struct {
@@ -57,15 +76,16 @@ var textreplacementMap = []struct {
 	{regexp.MustCompile("OVE"), "UV"},
 }
 
-type Modifiers struct {
+type Options struct {
 	TextReplacements float64
 	Stutters         float64
 	Kaomoji          float64
 	Exclamations     float64
 	Actions          float64
+	Unicode          bool
 }
 
-func Uwuify(r io.Reader, w io.Writer, m Modifiers) {
+func Uwuify(r io.Reader, w io.Writer, o Options) {
 	content, err := io.ReadAll(r)
 	if err != nil {
 		log.Fatalf("error reading file - %s", err)
@@ -74,11 +94,11 @@ func Uwuify(r io.Reader, w io.Writer, m Modifiers) {
 
 	words := strings.Split(s, " ")
 	for i := 0; i < len(words); i++ {
-		replaceText(&words[i], m.TextReplacements)
-		addStutters(&words[i], m.Stutters)
-		addKaomoji(&words[i], m.Kaomoji)
-		addExclamations(&words[i], m.Exclamations)
-		addActions(&words[i], m.Actions)
+		replaceText(&words[i], o.TextReplacements)
+		addStutters(&words[i], o.Stutters)
+		addKaomoji(&words[i], o.Kaomoji, o.Unicode)
+		addExclamations(&words[i], o.Exclamations)
+		addActions(&words[i], o.Actions)
 	}
 
 	s = strings.Join(words, " ")
@@ -104,9 +124,13 @@ func addExclamations(s *string, chance float64) {
 	})
 }
 
-func addKaomoji(s *string, chance float64) {
+func addKaomoji(s *string, chance float64, unicode bool) {
+	pool := kaomojiAscii
+	if unicode {
+		pool = append(pool, kaomojiUnicode...)
+	}
 	if rand.Float64() < chance {
-		*s = *s + " " + kaomoji[rand.Intn(len(kaomoji))]
+		*s = *s + " " + pool[rand.Intn(len(pool))]
 	}
 }
 
