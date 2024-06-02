@@ -1,5 +1,5 @@
 build:
-	go build -o bin/uwu
+	go build -o bin/uwuify
 doc:
 	./scripts/generate_docs.sh
 run:

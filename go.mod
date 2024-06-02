@@ -1,4 +1,4 @@
-module go-uwu
+module go-uwuify
 
 go 1.22.3
 

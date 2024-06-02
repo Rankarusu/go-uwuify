@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"go-uwu/internal"
+	"go-uwuify/internal"
 	"io"
 	"os"
 	"strings"
