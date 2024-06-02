@@ -3,7 +3,6 @@ package cmd
 import (
 	"go-uwu/internal"
 	"io"
-	"log"
 	"os"
 	"strings"
 
@@ -23,9 +22,7 @@ var (
 	allowUnicode     bool
 
 	rootCmd = &cobra.Command{
-
-		Use: "uwuify",
-
+		Use:   "uwuify",
 		Short: "uwuifies the given text",
 		Long: `transforms the given input and outputs it to the desired destination
 e.g. uwuify --infile input.txt -o ~/output.txt -u 1
@@ -38,57 +35,56 @@ the modifiers --uwu, --kaomoji, --stutters, --exclamations, and --actions can be
 .5 -> will occur 50% of the time
 1  -> will occur at every possibility, usually for, or after every word`,
 		SilenceUsage: true,
-		Run: func(cmd *cobra.Command, args []string) {
-			text, _ := cmd.Flags().GetString("text")
-			infile, _ := cmd.Flags().GetString("infile")
-			outfile, _ := cmd.Flags().GetString("outfile")
-
-			var reader io.Reader
-
-			stat, _ := os.Stdin.Stat()
-
-			switch {
-			case stat.Mode()&os.ModeDevice == 0:
-				// if the input does not come from a character device (e.g. a terminal), it is most likely piped in
-				reader = cmd.InOrStdin()
-			case infile != "":
-				file, err := os.Open(infile)
-				if err != nil {
-					log.Fatalf("error opening file - %s", err)
-				}
-				defer file.Close()
-				reader = file
-			case text != "":
-				reader = strings.NewReader(text)
-			default:
-				cmd.Help()
-				return
-			}
-
-			var writer io.Writer
-
-			if outfile != "" {
-				file, err := os.Create(outfile)
-				if err != nil {
-					log.Fatalf("error creating file - %s", err)
-				}
-				defer file.Close()
-				writer = file
-			} else {
-				writer = cmd.OutOrStdout()
-			}
-
-			internal.Uwuify(reader, writer, internal.Options{
-				TextReplacements: textReplacements,
-				Stutters:         stutters,
-				Kaomoji:          kaomoji,
-				Exclamations:     exclamations,
-				Actions:          actions,
-				Unicode:          allowUnicode,
-			})
-		},
+		RunE:         runFunc,
+		Version:      "0.1",
 	}
 )
+
+func runFunc(cmd *cobra.Command, args []string) error {
+	var reader io.Reader
+
+	stat, _ := os.Stdin.Stat()
+
+	switch {
+	case stat.Mode()&os.ModeDevice == 0:
+		// if the input does not come from a character device (e.g. a terminal), it is most likely piped in
+		reader = cmd.InOrStdin()
+	case infile != "":
+		file, err := os.Open(infile)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		reader = file
+	case text != "":
+		reader = strings.NewReader(text)
+	default:
+		cmd.Help()
+		return nil
+	}
+
+	var writer io.Writer
+
+	if outfile != "" {
+		file, err := os.Create(outfile)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		writer = file
+	} else {
+		writer = cmd.OutOrStdout()
+	}
+
+	return internal.Uwuify(reader, writer, internal.Options{
+		TextReplacements: textReplacements,
+		Stutters:         stutters,
+		Kaomoji:          kaomoji,
+		Exclamations:     exclamations,
+		Actions:          actions,
+		Unicode:          allowUnicode,
+	})
+}
 
 func Execute() {
 	err := rootCmd.Execute()

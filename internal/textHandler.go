@@ -2,7 +2,6 @@ package internal
 
 import (
 	"io"
-	"log"
 	"math/rand"
 	"regexp"
 	"strings"
@@ -85,10 +84,10 @@ type Options struct {
 	Unicode          bool
 }
 
-func Uwuify(r io.Reader, w io.Writer, o Options) {
+func Uwuify(r io.Reader, w io.Writer, o Options) error {
 	content, err := io.ReadAll(r)
 	if err != nil {
-		log.Fatalf("error reading file - %s", err)
+		return err
 	}
 	s := string(content)
 
@@ -105,8 +104,10 @@ func Uwuify(r io.Reader, w io.Writer, o Options) {
 
 	_, err = w.Write([]byte(s))
 	if err != nil {
-		log.Fatalf("error writing to file or stdout - %s", err)
+		return err
 	}
+
+	return nil
 }
 
 func addActions(s *string, chance float64) {

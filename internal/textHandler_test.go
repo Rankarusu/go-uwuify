@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -187,6 +189,55 @@ func TestAddStuttersAddsDashes(t *testing.T) {
 	if !strings.Contains(input, "-") {
 		t.Errorf("%s contains no dashes", input)
 	}
+}
+
+func TestUwuifyReturnsErrOnReadFail(t *testing.T) {
+	r := FailingReader{}
+	var w bytes.Buffer
+
+	err := Uwuify(r, &w, Options{1, 1, 1, 1, 1, false})
+
+	if err == nil {
+		t.Errorf("%s", err)
+	}
+}
+
+func TestUwuifyReturnsErrOnWriteFail(t *testing.T) {
+	r := strings.NewReader("hello")
+	w := FailingWriter{}
+
+	err := Uwuify(r, &w, Options{1, 1, 1, 1, 1, false})
+
+	if err == nil {
+		t.Errorf("%s", err)
+	}
+}
+
+func TestUwuifyTransformsText(t *testing.T) {
+	input := "hello"
+	r := strings.NewReader(input)
+	var w = bytes.Buffer{}
+
+	err := Uwuify(r, &w, Options{1, 1, 1, 1, 1, false})
+
+	if err != nil {
+		t.Errorf("%s", err)
+	}
+	if input == w.String() {
+		t.Errorf("%s == %s", input, w.String())
+	}
+}
+
+type FailingReader struct{}
+
+func (FailingReader) Read(b []byte) (n int, err error) {
+	return 0, errors.New("FailingReader: Read()")
+}
+
+type FailingWriter struct{}
+
+func (FailingWriter) Write(b []byte) (n int, err error) {
+	return 0, errors.New("FailingWriter: Write()")
 }
 
 func contains(s string, arr []string) bool {
