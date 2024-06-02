@@ -35,6 +35,7 @@ the modifiers --uwu, --kaomoji, --stutters, --exclamations, and --actions can be
 .5 -> will occur 50% of the time
 1  -> will occur at every possibility, usually for, or after every word`,
 		SilenceUsage: true,
+		Args:         cobra.NoArgs,
 		RunE:         runFunc,
 		Version:      "0.1",
 	}
@@ -94,6 +95,7 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.CompletionOptions.HiddenDefaultCmd = true
 	rootCmd.PersistentFlags().SortFlags = false
 	rootCmd.Flags().SortFlags = false
 
@@ -110,4 +112,5 @@ func init() {
 	rootCmd.PersistentFlags().Float64VarP(&exclamations, "exclamations", "e", .5, `probability for transforming punctuation. e.g. 1 -> !!11`)
 	rootCmd.PersistentFlags().Float64VarP(&actions, "actions", "a", .025, `probability for adding actions. e.g. *blushes*`)
 	rootCmd.Aliases = append(rootCmd.Aliases, "uwu")
+
 }
