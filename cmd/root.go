@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"go-uwuify/internal"
 	"io"
 	"os"
 	"strings"
 
+	"github.com/rankarusu/go-uwuify/internal"
 	"github.com/spf13/cobra"
 )
 

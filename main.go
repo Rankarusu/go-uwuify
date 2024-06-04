@@ -1,6 +1,6 @@
 package main
 
-import "go-uwuify/cmd"
+import "github.com/rankarusu/go-uwuify/cmd"
 
 func main() {
 	cmd.Execute()

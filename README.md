@@ -8,7 +8,7 @@ A command line tool written in Go with [Cobra](https://github.com/spf13/cobra) t
 ## Installation
 
 ```sh
-go install github.com/rankarusu/go-uwu
+go install github.com/rankarusu/go-uwuify@latest
 ```
 
 This installs to $HOME/go/bin/ by default, which can be added to your $PATH:

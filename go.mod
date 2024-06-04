@@ -1,4 +1,4 @@
-module go-uwuify
+module github.com/rankarusu/go-uwuify
 
 go 1.22.3
 
