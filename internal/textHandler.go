@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"regexp"
 	"strings"
+	"sync"
 	"unicode"
 )
 
@@ -92,13 +93,20 @@ func Uwuify(r io.Reader, w io.Writer, o Options) error {
 	s := string(content)
 
 	words := strings.Split(s, " ")
+	wg := sync.WaitGroup{}
+
 	for i := 0; i < len(words); i++ {
-		replaceText(&words[i], o.TextReplacements)
-		addStutters(&words[i], o.Stutters)
-		addKaomoji(&words[i], o.Kaomoji, o.Unicode)
-		addExclamations(&words[i], o.Exclamations)
-		addActions(&words[i], o.Actions)
+		wg.Add(1)
+		go func(w *string, wg *sync.WaitGroup) {
+			defer wg.Done()
+			replaceText(w, o.TextReplacements)
+			addStutters(w, o.Stutters)
+			addKaomoji(w, o.Kaomoji, o.Unicode)
+			addExclamations(w, o.Exclamations)
+			addActions(w, o.Actions)
+		}(&words[i], &wg)
 	}
+	wg.Wait()
 
 	s = strings.Join(words, " ")
 
@@ -109,7 +117,6 @@ func Uwuify(r io.Reader, w io.Writer, o Options) error {
 
 	return nil
 }
-
 func addActions(s *string, chance float64) {
 	if rand.Float64() < chance {
 		*s = *s + " " + actions[rand.Intn(len(actions))]

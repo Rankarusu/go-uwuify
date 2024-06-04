@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -21,7 +22,7 @@ func BenchmarkTextHandler(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		f, _ := os.Open("../test/pasta.txt")
 		defer f.Close()
-		Uwuify(f, os.Stdout, Options{1, 1, 1, 1, 1, true})
+		Uwuify(f, io.Discard, Options{1, 1, 1, 1, 1, true})
 	}
 }
 
